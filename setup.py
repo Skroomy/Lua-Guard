@@ -23,9 +23,9 @@ config = {
 	"log_time" : 24
 }
 
-config["token"] = input("Input your bot's token")
-config["prefix"] = input("Input your preffered prefix")
-config["admin_ids"][0] = input("Input your discord id")
+config["token"] = input("Input your bot's token: ")
+config["prefix"] = input("Input your preffered prefix: ")
+config["admin_ids"].append(int(input("Input your discord id: ")))
 
 config_file.write(json.dumps(config))
 config_file.close()
@@ -34,21 +34,28 @@ print("Created config \nCreating the database")
 
 conn = sqlite3.connect(base_path + "database.db")
 cursor = conn.cursor()
-
-cursor.execute('''CREATE TABLE bans (
+try:
+	cursor.execute('''CREATE TABLE bans (
                     id INTEGER PRIMARY KEY,
                     discord_id INTEGER NOT NULL,
                		timestamp INTEGER NOT NULL,
-                    banned INTEGER NOT NULL
+                    reason TEXT NOT NULL)''')
 
-                )''')
-
-cursor.execute('''CREATE TABLE users (
+	cursor.execute('''CREATE TABLE users (
                     id INTEGER PRIMARY KEY,
                     discord_id INTEGER,
                     license TEXT NOT NULL UNIQUE,
-                    registered INTEGER NOT NULL,
-                    banned INTEGER,
-                    FOREIGN KEY(banned) REFERENCES bans(banned) 
-                )''')
+                    registered INTEGER,
+                    tier INTEGER NOT NULL)''')
 
+               	
+except sqlite3.Error as e:
+	print("Sqlite3 Error: ", e)
+
+
+print("Database created")
+conn.commit()
+cursor.close()
+conn.close()
+
+print("Finished setup.")
